@@ -1,0 +1,82 @@
+﻿@model IEnumerable<Rental>
+@using Movies.Domain.Models
+@using Movies.Shared.Interfaces
+
+@inject IRepository  _repository
+@using Movies.Infrastructure.Data
+@using Microsoft.AspNetCore.Identity
+@inject MoviesDbContext context
+@inject UserManager<ApplicationUser> _userManager
+@{
+    ViewData["Title"] = "Rented movies - MovieDB";
+    var index = 1;
+    var now = DateTime.Now;
+    var userID = _userManager.GetUserId(User);
+    //Movie movieA = null;
+    //var query = from r in context.Rentals
+    //            where r.MovieID == Model.Id && r.UserId == userID && r.RentEndDate >= now
+    //            select r;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-12 text-center"><h2>Rented movies: </h2></div>
+</div>
+<div class="row justify-content-center">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        #
+                    </th>
+                    <th>
+                        Poster
+                    </th>
+                    <th>
+                        Title
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.First().Payment.Price)
+                    </th>
+                    <th>
+                        Rented on
+                    </th>
+                    <th>
+                        Valid to
+                    </th>
+                    <th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    var movieA = _repository.GetById<Movie>(item.MovieID);
+                    var posterPath = "/images/" + (movieA.PosterPath ?? "poster-placeholder.png");
+
+                    <tr>
+                        <td>
+                            @index
+                        </td>
+                        <td rowspan="2" class="posterHeader">
+                                <img class="poster" src="@posterPath" />
+                            </td>
+                        <td>
+                            <a asp-action="Details" asp-controller="Movies" asp-route-id=@item.MovieID>@movieA.Title</a>
+                        </td>
+                        <td>
+                            @movieA.Price<span>$</span>
+                        </td>
+                        <td>
+                            <span class=""><i class="far fa-calendar-check"></i></span>@Html.DisplayFor(modelItem => item.RentStartDate)
+                        </td>
+                        <td>
+                            <span class=""><i class="far fa-calendar-check"></i></span>@Html.DisplayFor(modelItem => item.RentEndDate)
+                        </td>
+                    </tr>
+                    <tr></tr>
+                    index++;
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

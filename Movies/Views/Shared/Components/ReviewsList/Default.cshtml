@@ -1,0 +1,39 @@
+﻿@model IEnumerable<Review>
+@using Movies.Web.Models
+@using Movies.Domain.Models
+@using Movies.Infrastructure.Data
+@using Microsoft.AspNetCore.Identity
+@using Movies.Domain
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+
+@{
+    var reviews = this.Model.Count();
+}
+<dd>
+    <div class="comments-container">
+        @if (Model.Count() > 0)
+        {
+            @foreach (var review in Model)
+            {
+                <div class="comment-main-level">
+                    <div class="comment-box">
+                        <div class="comment-head">
+                            <h6 class="comment-name by-author"><a id="@review.UserID" asp-action="UserDetails" asp-controller="Social" asp-route-id="@review.UserID">User: @Html.DisplayFor(modelItem => UserManager.FindByIdAsync(review.UserID).Result.Email)</a></h6>
+                            <span>@Html.DisplayFor(modelItem => review.CreatedAt) | rating: @Html.DisplayFor(modelItem => review.Rating) <a class="fa fa-star checked"></a> </span>
+                        </div>
+                        <div class="comment-content wrap">
+                            <a>@Html.DisplayFor(modelItem => review.Content)</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="row justify-content-center">
+                <p>No comments yet! Be first!</p>
+            </div>
+        }
+    </div>
+</dd>

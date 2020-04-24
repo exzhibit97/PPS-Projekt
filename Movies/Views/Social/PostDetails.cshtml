@@ -1,0 +1,29 @@
+﻿@model Movies.Domain.Models.BoardPost
+
+@{
+    ViewData["Title"] = "PostDetails";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <h1>@Model.Title</h1>
+    <div class="whole-details">
+        <div class="main-post">
+            <a>@Model.CreatedAt</a>
+            <p>@Model.User.Email</p>
+            <p>@Model.Content</p>
+        </div>
+
+        @foreach (var reply in Model.Replies)
+        {
+            <div class="reply">
+                <p>@reply.User.Email</p>
+                <p>@reply.Content</p>
+            </div>
+        }
+
+    </div>
+
+    @await Html.PartialAsync("Partials/_PostReplyForm", new Movies.Domain.Models.Reply(), new ViewDataDictionary(ViewData) { { "postId", Model.Id } })
+</div>
+

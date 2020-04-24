@@ -1,0 +1,187 @@
+﻿@model Movies.Web.ViewModels.SocialViewModels.UserProfileViewModel
+@inject Movies.Shared.Interfaces.IRepository repository
+@inject Movies.Infrastructure.Data.MoviesDbContext context
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> userManager
+@inject Microsoft.AspNetCore.Identity.SignInManager<ApplicationUser> signInManager
+@using Microsoft.EntityFrameworkCore;
+@using System.Linq
+@{
+    ViewData["Title"] = "View";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var usersRatedMovies = (from movies in context.Movies join rev in context.Reviews on movies.Id equals rev.MovieId where rev.UserID == Model.User.Id select new { Title = movies.Title, PosterPath = movies.PosterPath, Rating = rev.Rating, Id = movies.Id, CreatedAt = rev.CreatedAt }).OrderByDescending(r => r.CreatedAt);
+    var userRatedMoviesCount = usersRatedMovies.Count();
+
+    var usersFavouriteMovies = (from favouritedmovies in context.FavoritedMovies join movies in context.Movies on favouritedmovies.Movie.Id equals movies.Id select new { Title = movies.Title, PosterPath = movies.PosterPath, Id = movies.Id, CreatedAt = favouritedmovies.CreatedAt }).OrderByDescending(f => f.CreatedAt);
+    var usersFavouriteMoviesCount = usersFavouriteMovies.Count();
+
+    var currentUser = userManager.GetUserAsync(User).Result;
+
+    var userPostsAndReplies = (from posts in context.BoardPosts where posts.UserID == Model.User.Id select posts);
+    var userPosts = context.BoardPosts.Include(bp => bp.Replies).Where(bp => bp.UserID == Model.User.Id).OrderByDescending(p => p.CreatedAt).ToList().Take(5);
+    var userId = userManager.GetUserId(User);
+    var userName = Model.User.Name + " " + Model.User.Surname;
+    var isFollowed = context.Followings.Where(f => f.FollowedUserId == Model.User.Id).Where(f => f.FollowingUserId == currentUser.Id).Where(f => f.IsActive == true);
+
+    var followedClass = isFollowed.Count() > 0 ? "followed animated rubberBand" : "";
+    var followedImage = isFollowed.Count() > 0 ? "/images/social/follow_icon_followed_blue.png" : "/images/social/follow_icon.png";
+
+    var haveLikedMoviesClass = usersFavouriteMoviesCount > 0 ? "animated heartBeat" : "";
+    var haveLikedMoviesImage = usersFavouriteMoviesCount > 0 ? "/images/social/love_filled.png" : "/images/social/love.png";
+
+    var haveRatedMoviesClass = usersFavouriteMoviesCount > 0 ? "animated rotateIn" : "";
+    var haveRatedMoviesImage = usersFavouriteMoviesCount > 0 ? "/images/social/star_filled.png" : "/images/social/star.png";
+}
+<div class="row justify-content-center">
+    <div class="profile-card">
+        <div class="profile-card-top">
+            <div class="profile-card-info">
+                <img src="~/images/avatar.jpg" alt="Avatar" />
+                <h2>@userName</h2>
+            </div>
+        </div>
+        <div class="profile-card-bottom">
+            <div class="social-interactions">
+                @if (signInManager.IsSignedIn(User))
+                {
+                    if (userManager.GetUserId(User) == Model.User.Id)
+                    {
+                        <div class="social-interactions-followers">
+                            <img id="followIcon" src="~/images/social/follow_icon.png" alt="Follow" />
+                            <a>300</a>
+                        </div>
+                        <div class="social-interactions-favorites">
+                            <img src="~/images/social/love.png" alt="Favorite" />
+                            <a>@usersFavouriteMoviesCount</a>
+                        </div>
+                        <div class="social-interactions-rated">
+                            <img src="~/images/social/star.png" alt="Rated" />
+                            <a>@userRatedMoviesCount</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="social-interactions-followers">
+                            <a asp-action="FollowUser" asp-controller="Social" asp-route-id="@Model.User.Id">
+                                <img class="@followedClass" id="followIcon" onclick="toggleFollow()" src=@followedImage alt="Follow" />
+                            </a>
+                            <a>300</a>
+                        </div>
+                        <div class="social-interactions-favorites">
+                            <img class="@haveLikedMoviesClass" src=@haveLikedMoviesImage alt="Favorite" />
+                            <a>@usersFavouriteMoviesCount</a>
+                        </div>
+                        <div class="social-interactions-rated">
+                            <img class="@haveRatedMoviesClass" src=@haveRatedMoviesImage alt="Rated" />
+                            <a>@userRatedMoviesCount</a>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="social-interactions-followers">
+                        <img src="~/images/social/follow_icon.png" alt="Follow" />
+                        <a>300</a>
+                    </div>
+                    <div class="social-interactions-favorites">
+                        <img class="@haveLikedMoviesClass" src=@haveLikedMoviesImage alt="Favorite" />
+                        <a>@usersFavouriteMoviesCount</a>
+                    </div>
+                    <div class="social-interactions-rated">
+                        <img class="@haveRatedMoviesClass" src=@haveRatedMoviesImage alt="Rated" />
+                        <a>@userRatedMoviesCount</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    @section Scripts {
+        <script type="text/javascript">
+            function toggleFollow() {
+
+                var followIcon = document.getElementById("followIcon")
+                if (followIcon.className == "") {
+                    followIcon.className = "followed animated rubberBand"
+                    console.log("followed")
+                    followIcon.src = "/images/social/follow_icon_followed.png"
+                } else if (followIcon) {
+                    followIcon.className = ""
+                    console.log("unfollowed")
+                    followIcon.src = "/images/social/follow_icon.png"
+                }
+
+            }
+        </script>
+        <script>
+            $("#followIcon").on('click', function (e) {
+                e.preventDefault();
+                var followedUserId = "@Model.User.Id";
+                FollowToggle(followedUserId);
+
+            })
+
+            function FollowToggle(FollowedUserId) {
+
+                var newFollowing = {
+                    followedUserId: FollowedUserId
+                };
+
+                $.ajax({
+                    url: "/Social/FollowUser/" + FollowedUserId,
+                    data: JSON.stringify(newFollowing),
+                    type: "POST",
+                    contentType: "application/json;charset=UTF-8",
+                    dataType: "json",
+                    success: function (data) {
+                        console.log(data);
+                    }
+                })
+            }
+        </script>
+    }
+</div>
+
+<div class="row justify-content-center">
+    <div class="recent-social-activity">
+        <h2>Social activity</h2>
+        @foreach (var item in userPosts.ToList())
+        {
+            <div class="post-wrapper">
+                <h3><a asp-action="PostDetails" asp-controller="Social" asp-route-id="@item.Id">@item.Title</a></h3>
+                <p>@item.Content</p>
+                <p>This post has @item.Replies.Count replies</p>
+            </div>
+        }
+    </div>
+</div>
+
+
+<div class="row justify-content-center">
+    <div class="recently-interacted-movies">
+        <h2>Recently rated</h2>
+        @foreach (var item in usersRatedMovies.Take(4).ToList())
+        {
+            var posterPath = "/images/" + (item.PosterPath ?? "poster-placeholder.png");
+            <div class="movie-card">
+                <div class="center"><a id="@item.Id" asp-action="Details" asp-controller="Movies" asp-route-id="@item.Id"><img class="poster" src="@posterPath" /></a></div>
+                <br />
+                <div class="card-title"><a><i class="fas fa-star star-icon" aria-hidden="true"></i>@item.Title - @item.Rating</a></div>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="row">
+    <div class="recently-interacted-movies">
+        <h2>Recently liked:</h2>
+        @foreach (var item in usersFavouriteMovies.Take(4).ToList())
+        {
+            var posterPath = "/images/" + (item.PosterPath ?? "poster-placeholder.png");
+            <div class="movie-card">
+                <div class="center"><a id="@item.Id" asp-action="Details" asp-controller="Movies" asp-route-id="@item.Id"><img class="poster" src="@posterPath" /></a></div>
+                <br />
+                <div class="card-title"><a><i class="fas fa-star star-icon" aria-hidden="true"></i>@item.Title</a></div>
+            </div>
+        }
+    </div>
+</div>

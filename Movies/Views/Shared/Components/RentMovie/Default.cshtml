@@ -1,0 +1,86 @@
+﻿@model MovieRentalViewModel
+@using Movies.Domain.Models
+@using Movies.Web.ViewModels
+@using Movies.Shared.Interfaces
+@inject IRepository  _repository
+@{
+    int id = (int)ViewData["movieID"];
+    var movie = _repository.GetById<Movie>(id);
+    var priceOneDay = 4.99;
+    var priceThreeDays = priceOneDay * 2.75;
+    var priceWeek = priceOneDay * 6;
+}
+<script src="~/lib/jquery/jquery.creditCardValidator.js"></script>
+@*<h1>@movie.Title and @id</h1>*@
+
+
+@using (Html.BeginForm("ConfirmPayment", "Rental", FormMethod.Post))
+{
+    
+    @Html.HiddenFor(m => m.Movie.Id)
+    @Html.Hidden("MovieID", (object)ViewBag.Id)    
+    <div class="collapse" id="collapseExample">
+        <div class="card card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group row">
+                        <label asp-for="Payment.CardNo" class="control-label"></label>
+                        <input asp-for="Payment.CardNo" id="cardInput" class="form-control" />
+                        <p class="log"></p>
+                        <span asp-validation-for="Payment.CardNo" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <input type="submit" id="buttonCreate" value="Create" class="btn btn-secondary" disabled />
+
+            </div>
+        </div>
+    </div>
+
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('#cardInput').validateCreditCard(function (result) {
+                //$('.log').html('Card type: ' + (result.card_type == null ? '-' : result.card_type.name)
+                //    + '<br>Valid: ' + result.valid
+                //    + '<br>Length valid: ' + result.length_valid
+                //    + '<br>Luhn valid: ' + result.luhn_valid);
+                //console.log(result.valid);
+                $(document).ready(function () {
+                    $('.form-control').keyup(function () {
+
+                        var empty = false;
+                        $('.form-control').each(function () {
+                            if ($(this).val().length == 0) {
+                                empty = true;
+                            }
+                        });
+
+                        if (empty) {
+                            $('.btn-secondary').attr('disabled', 'disabled');
+                        } else if (!empty && result.valid == true) {
+                            $('.btn-secondary').removeAttr('disabled');
+                        } else {
+                            $('.btn-secondary').attr('disabled', 'disabled');
+                        }
+                    });
+                });
+
+            });
+        });
+
+
+    </script>
+    @*<script>
+            $(function () {
+                $('input').validateCreditCard(function (result) {
+                    $('.log').html('Card type: ' + (result.card_type === null ? '-' : result.card_type.name) + '<br>Valid: ' + result.valid + '<br>Length valid: ' + result.length_valid + '<br>Luhn valid: ' + result.luhn_valid);
+                });
+            });
+        </script>*@
+
+
+    @*</form>*@
+}

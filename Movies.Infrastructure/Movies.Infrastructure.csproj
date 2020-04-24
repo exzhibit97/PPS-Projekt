@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Migrations\20200105182648_addedrentandpayment.cs" />
+    <Compile Remove="Migrations\20200105182648_addedrentandpayment.Designer.cs" />
+    <Compile Remove="Migrations\20200105182818_addedrentandpaymentUPDATE.cs" />
+    <Compile Remove="Migrations\20200105182818_addedrentandpaymentUPDATE.Designer.cs" />
+    <Compile Remove="Migrations\20200105184012_addedrentandpaymentUPDATE2.cs" />
+    <Compile Remove="Migrations\20200105184012_addedrentandpaymentUPDATE2.Designer.cs" />
+    <Compile Remove="Migrations\20200105184239_addedrentandpaymentUPDATE3.cs" />
+    <Compile Remove="Migrations\20200105184239_addedrentandpaymentUPDATE3.Designer.cs" />
+    <Compile Remove="Migrations\20200105184418_addedrentandpaymentUPDATE4.cs" />
+    <Compile Remove="Migrations\20200105184418_addedrentandpaymentUPDATE4.Designer.cs" />
+    <Compile Remove="Migrations\20200105185531_updateToActual.cs" />
+    <Compile Remove="Migrations\20200105185531_updateToActual.Designer.cs" />
+    <Compile Remove="Migrations\20200105190017_updateToActual2.cs" />
+    <Compile Remove="Migrations\20200105190017_updateToActual2.Designer.cs" />
+    <Compile Remove="Migrations\20200105203251_updateToActual3.cs" />
+    <Compile Remove="Migrations\20200105203251_updateToActual3.Designer.cs" />
+    <Compile Remove="Migrations\20200105203353_updateToActual4.cs" />
+    <Compile Remove="Migrations\20200105203353_updateToActual4.Designer.cs" />
+    <Compile Remove="Migrations\20200105203945_updateToActual5.cs" />
+    <Compile Remove="Migrations\20200105203945_updateToActual5.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EntityFramework" Version="6.4.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="3.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Movies.Domain\Movies.Domain.csproj" />
+    <ProjectReference Include="..\Movies.Shared\Movies.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

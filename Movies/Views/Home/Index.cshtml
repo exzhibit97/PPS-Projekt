@@ -1,0 +1,14 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+    Layout = "_LayoutIndex";
+}
+
+    <div class="text-center hero2">
+        <h1 class="display-4">Welcome</h1>
+        <h6>MovieDB is the world's most populat and authorative source for movie content. Find ratings and reviews for the newest movies. We also provide movie rental service - all about movies in one place!</h6>
+        <br />
+        <div>
+            @await Component.InvokeAsync("TopRated")
+        </div>
+    </div>
+

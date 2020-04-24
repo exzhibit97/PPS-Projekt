@@ -1,0 +1,158 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MovieDB</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/style.css" />
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/owl.carousel.js"></script>
+    <script src="~/js/owl.carousel.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://kit.fontawesome.com/be81e631e7.js" crossorigin="anonymous"></script>
+    <script src="~/lib/jquery/jquery.creditCardValidator.js"></script>
+    <link rel="stylesheet" href="~/css/owl.carousel.css" />
+    <link rel="stylesheet" href="~/css/owl.theme.default.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/style.css" />
+    <link rel="stylesheet" href="~/css/animate.css" />
+
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light box-shadow mb-3 fixed-top">
+            <div class="container">
+                <span id="logo" class="logoNone" style="margin-right:5px"><img src="~/uploads/logox.jpg" /></span>
+                <a class="navbar-brand" asp-area="" asp-controller="Movies" asp-action="Index">MovieDB</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                    </ul>
+                </div>
+                <partial name="_LoginPartial" />
+            </div>
+        </nav>
+        <div class="hero">
+            <div id="carousel" class="owl-carousel">
+                <div class="carousel-item1"></div>
+                <div class="carousel-item2"></div>
+                <div class="carousel-item3"></div>
+                <div class="carousel-item4"></div>
+                <div class="carousel-item5"></div>
+            </div>
+        </div>
+
+    </header>
+    <div class="container blackParagraphFontColor">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container text-center">
+            &copy; 2020 - MovieDB - <a asp-area="" asp-page="/Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        $(window).on('scroll', function () {
+            if ($(window).scrollTop()) {
+                $('nav').addClass('black');
+                $('nav a').addClass('text-warning');
+                $('nav a').removeClass('text-dark');
+                $('nav').removeClass('bg-white');
+                $('nav').css({
+                    "padding-top": "8px !important"
+                });
+            }
+            else {
+                $('nav').removeClass('black');
+                $('nav a').addClass('text-dark');
+                $('nav').addClass('defaultNav');
+                //$('nav').addClass('bg-white');
+                $('#logo').addClass('logoNone');
+                $('nav').css({
+                    "padding-top": "0px !important"
+                });
+            }
+        });
+    </script>
+    <script>
+
+        $('#carousel').owlCarousel({
+            autoPlay: 10000,
+            autoplaySpeed: 1000,
+            singleItem: true,
+            autoplayTimeout: 6000,
+            items: 1,
+            loop: true,
+            autoplay: true,
+            touchDrag: false,
+            mouseDrag: false,
+            pagination: false,
+            itemsDesktopSmall: [1199, 1],
+            itemsTablet: [768, 1],
+            autoHeight: true
+        });
+
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            $('.comment-icon').on('click', function (e) {
+                var postWrapper = $(e.target).parent('.replies-section').parent('.post-wrapper');
+                postWrapper.append('<div class="quick-reply">' +
+                    '<form action="/Social/ReplyToPost" method="post">' +
+                    '<textarea name="Content" id="reply" class="form-control" rows ="6" style ="width:100%"></textarea >' +
+                    '<input type="submit" value="reply to post" id="addReply" class="btn btn-primary btn-commit">' +
+                    '</form>' +
+                    '</div>');
+                $('#addReply').on('click', function (e) {
+                    e.preventDefault();
+                    var postId = $('#addReply').parent('form').parent('.quick-reply').siblings('.replies-section').children('img').attr('id');
+                    console.log(postId);
+                    var id = parseInt(postId);
+                    console.log(id);
+                    var content = $('#reply').val();
+                    console.log(content);
+                    AddReply(id, content, e);
+                    $('.quick-reply').detach();
+                })
+            });
+        });
+
+        function AddReply(id, content, event) {
+            var ev = event;
+            var replyObj = {
+                RootPostId: id,
+                Content: content,
+            };
+            $.ajax({
+                url: "/Social/ReplyToPost/",
+                data: JSON.stringify(replyObj),
+                type: "POST",
+                contentType: "application/json:charset=UTF-8",
+                dataType: "json"
+            });
+        }
+    </script>
+
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

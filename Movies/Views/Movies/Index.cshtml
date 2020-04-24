@@ -1,0 +1,103 @@
+﻿@model IEnumerable<Movies.Web.Models.MovieDTO>
+
+@{
+    ViewData["Title"] = "All movies";
+
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-12 text-center"><h2>MovieDB</h2></div>
+</div>
+
+@if (User.Identity.IsAuthenticated)
+{
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="row justify-content-center">
+            <p>
+                <a id="create" asp-action="Create">Create New</a>
+            </p>
+        </div>
+    }
+}
+
+@using (Html.BeginForm())
+{
+    <div class="row justify-content-center search-box">
+        <form class="form-inline md-form form-sm mt-0">
+            Search: @Html.TextBox("SearchString", null, new { @class = "form-control form-control-sm ml-3 w-50" })
+            <i class="fas fa-search loop-icon" aria-hidden="true"></i>
+        </form>
+    </div>
+}
+
+@if (Model.Count() != 0)
+{
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                    </th>
+                    <th>
+                        @Html.ActionLink("Title", "Index", new { sortOrder = ViewBag.NameSortParm })
+                    </th>
+                    <th>
+                        @Html.ActionLink("Runtime", "Index", new { sortOrder = ViewBag.RuntimeSortParm })
+                    </th>
+                    <th>
+                        @Html.ActionLink("Year", "Index", new { sortOrder = ViewBag.YearSortParm })
+                    </th>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <th>Administracja</th>
+                        }
+                    }
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    var posterPath = "/images/" + (item.PosterPath ?? "poster-placeholder.png");
+                    <tr>
+                        <td rowspan="2" class="posterHeader">
+                            <img class="poster" src="@posterPath" />
+                        </td>
+                        <td>
+                            <a asp-action="Details" asp-route-id=@item.Id>@Html.DisplayFor(modelItem => item.Title)</a>
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Runtime)<span>min</span>
+                        </td>
+                        <td>
+                            <span class=""><i class="far fa-calendar-check"></i></span>@Html.DisplayFor(modelItem => item.Year)
+                        </td>
+                        <td>
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a asp-action="Edit" asp-route-id="@item.Id">Edit |</a>
+                                    <a asp-action="Details" asp-route-id="@item.Id">Details |</a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                                }
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="6">
+                            @Html.DisplayFor(modelItem => item.Description)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    @await Html.PartialAsync("Partials/_SearchStringNotFound");
+}

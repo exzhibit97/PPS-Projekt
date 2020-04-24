@@ -1,0 +1,152 @@
+﻿@*@model IEnumerable<MovieAvgRating>*@
+@model IEnumerable<Movies.Domain.Models.Movie>
+@using Movies.Infrastructure.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Http 
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject MoviesDbContext context
+
+@{
+
+}
+
+<div class="top-rated">
+    <div class="row justify-content-center">
+        @if (Model.Count() == 0)
+        {
+            @for (int i = 0; i < 3; i++)
+            {
+                <div class="col-md-4 col-xs-1">
+                    <div class="poster center"><img class="poster" src="~/images/poster-placeholder.png" /></div>
+                    <br />
+                    <div class="card-title"><a>? reviews</a></div>
+                    <div class="card-title"><a><i class="fas fa-star star-icon" aria-hidden="true"></i>?</a></div>
+                </div>
+            }
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                var posterPath = "/images/" + (item.PosterPath ?? "poster-placeholder.png");
+
+                var movie = context.Movies
+                    .Single(m => m.Id == item.Id);
+
+                var reviewsCount = context.Entry(movie)
+                    .Collection(m => m.Reviews)
+                    .Query()
+                    .Count();
+
+                var reviews = context.Entry(movie)
+                    .Collection(m => m.Reviews)
+                    .Query();
+                decimal sum = 0;
+                foreach (var review in reviews)
+                {
+                    sum += review.Rating;
+                }
+                string rating;
+                if (reviewsCount == 0)
+                {
+                    rating = "No ratings";
+                }
+                else
+                {
+                    decimal avgRating = (sum / reviewsCount);
+                    rating = avgRating.ToString("0.00");
+                }
+                <div class="col-md-4 col-xs-1">
+                    <div class="center"><a id="@item.Id" asp-action="Details" asp-controller="Movies" asp-route-id="@item.Id"><img class="poster" src="@posterPath" /></a></div>
+                    <br />
+                    <div class="card-title"><a>@reviewsCount reviews</a></div>
+                    <div class="card-title"><a><i class="fas fa-star star-icon" aria-hidden="true"></i>@rating</a></div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@await Html.PartialAsync("Partials/_BoardPostForm", new Movies.Domain.Models.BoardPost()) 
+
+<div class="row">
+    <div class="col-md-12 news">
+        <h1 class="display-4">News</h1>
+    </div>
+</div>
+<div class="row justify-content-center static-content">
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <img class="thumbnail posterIndex" src="~/images/index_thumbnails/spiderman_thumbnail.jpg" />
+        </div>
+        <div class="col-md-8 indexArticle wrap">
+            <div class="posterIndex">
+                <div class="row">
+                    <div class="col-md-12">
+                        <p>BIULETYN: "Marvel's Spider-Man: Maximum Venom"</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="col-md-12 textArticle wrap">
+                            <a>
+                                Stacja Disney XD zamawia trzeci sezon serialu animowanego "Marvel's Spider-Man".
+                                Będzie on nosił podtytuł "Maximum Venom".
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <img class="thumbnail posterIndex" src="~/images/index_thumbnails/adam_sandler_thumbnail.jpg" />
+        </div>
+        <div class="col-md-8 indexArticle wrap">
+            <div class="posterIndex">
+                <div class="row">
+                    <div class="col-md-12">
+                        <p>Adam Sandler w halloweenowej komedii dla Netfliksa</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="col-md-12 textArticle">
+                            <a>
+                                Adam Sandler szykuje kolejny film dla Netfliksa. Będzie to upiorna komedia "Hubie Halloween".
+                                Gwiazdor wcieli się w poczciwego pracownika delikatesów, Hubiego, który mieszka w osławionym miasteczku Salem. W halloweenową noc dochodzi tam do morderstwa.
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <img class="thumbnail posterIndex" src="~/images/index_thumbnails/alien_thumbnail.jpg" />
+        </div>
+        <div class="col-md-8 indexArticle wrap">
+            <div class="posterIndex">
+                <div class="row">
+                    <div class="col-md-12">
+                        <p>Ridley Scott szykuje kolejnego "Obcego"?</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="col-md-12 textArticle">
+                            <a>
+                                Wygląda na to, że kontynuacja "Prometeusza" oraz "Obcego: Przymierza" wciąż ma szansę na
+                                realizację. Jak podaje branżowy dziennik "Variety", aktualnie trwają prace nad scenariuszem
+                                filmu, który wyreżyseruje Ridley Scott.
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

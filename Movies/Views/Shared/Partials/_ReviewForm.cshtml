@@ -1,0 +1,54 @@
+﻿@model Movies.Web.Models.ReviewDTO
+@using Movies.Infrastructure.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Authorization;
+@using Microsoft.AspNetCore.Mvc;
+@inject UserManager<ApplicationUser> UserManager
+@{
+    Model.MovieId = (int)ViewData["movieid"];
+}
+@using (Html.BeginForm("PostReview", "Reviews", FormMethod.Post))
+{
+
+    <div class="comment-form">
+        @Html.HiddenFor(x => x.MovieId, new { @Value = (int)ViewData["movieid"] })
+        @*<form asp-controller="Review" asp-action="PostReview" method="post">*@
+        <form>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="box">
+                <center><div id="value"></div></center>
+            </div>
+            <div class="form-group">
+                <input asp-for="Rating" type="range" id="slider" class="form-control-range slider" min="0" max="10" step="1" value="5">
+                <span asp-validation-for="Rating" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                @*<label asp-for="Content" class="control-label"></label>*@
+                <textarea asp-for="Content" class="form-control" rows="5"></textarea>
+                <span asp-validation-for="Content" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Add review" id ="addReview" class="btn btn-primary btn-commit" />
+            </div>
+            <script type="text/javascript">
+                var slider = document.getElementById("slider");
+                var val = document.getElementById("value");
+                val.innerHTML = slider.value;
+                slider.oninput = function () {
+                    val.innerHTML = this.value;
+                }
+            </script>
+            @section Scripts {
+                <script>
+                    var slider = document.getElementById("slider");
+                    var val = document.getElementById("value");
+                    val.innerHTML = slider.value;
+                    slider.oninput = function () {
+                        val.innerHTML = this.value;
+                    }
+                </script>
+            }
+        </form>
+    </div>
+}

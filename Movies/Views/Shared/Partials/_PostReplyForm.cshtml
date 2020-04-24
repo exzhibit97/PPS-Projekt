@@ -1,0 +1,65 @@
+﻿@model Movies.Domain.Models.Reply
+@inject Microsoft.AspNetCore.Identity.SignInManager<ApplicationUser> signInManager
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> userManager
+@inject Movies.Infrastructure.Data.MoviesDbContext context
+@using Movies.Web.Models
+@{
+    var postId = ViewData["postId"];
+}
+
+@if (signInManager.IsSignedIn(User))
+{
+    <div class="status-form">
+        <form>
+            <div class="form-group">
+                <textarea asp-for="Content" class="form-control" rows="5"></textarea>
+                <span asp-validation-for="Content" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Update your status" id="addReply" class="btn btn-primary btn-commit" />
+            </div>
+            <div class="form-group">
+                <input type="hidden" id="rootPostId" name="RootPostId" value="@postId" />
+            </div>
+        </form>
+
+        <script>
+            $(document).ready(function () {
+                $('#addReply').on('click', function (e) {
+                    e.preventDefault();
+                    var postId = $('#rootPostId').attr('value');
+                    console.log(postId);
+                    var id = parseInt(postId);
+                    console.log(id);
+                    var content = $('#Content').val();
+                    console.log(content);
+                    AddReply(id, content, e);
+                });
+            });
+
+            function AddReply(id, content, ev) {
+
+                var ev = event;
+                var replyObj = {
+                    RootPostId: id,
+                    Content: content,
+                };
+                $.ajax({
+                    url: "/Social/ReplyToPost/",
+                    data: JSON.stringify(replyObj),
+                    type: "POST",
+                    contentType: "application/json:charset=UTF-8",
+                    dataType: "json",
+                    success: function (data) {
+                        console.log(data);
+                        $('.whole-details').append('<div class="reply">' +
+                            '<p>' + data.user.userName + '</p>' +
+                            '<p>' + data.content + '</p>' +
+                            '</div>');
+                    }
+                });
+            }
+        </script>
+
+    </div>
+}

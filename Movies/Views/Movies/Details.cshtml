@@ -1,0 +1,143 @@
+﻿@model Movies.Web.Models.MovieDTO
+@*@model Movies.Web.ViewModels.DomainRelated.MovieReviewVieModel*@
+@using Movies.Infrastructure.Data
+@using Microsoft.AspNetCore.Identity
+@inject MoviesDbContext context
+@inject UserManager<ApplicationUser> _userManager
+
+@{
+    ViewData["Title"] = "Details MovieDB";
+    var posterPath = "/images/" + (this.Model.PosterPath ?? "poster-placeholder.png");
+    var movie = context.Movies
+        .Single(m => m.Id == Model.Id);
+
+    var reviewsCount = context.Entry(movie)
+        .Collection(m => m.Reviews)
+        .Query()
+        .Count();
+
+    var reviews = context.Entry(movie)
+        .Collection(m => m.Reviews)
+        .Query();
+    decimal sum = 0;
+    foreach (var review in reviews)
+    {
+        sum += review.Rating;
+    }
+    string rating;
+    if (reviewsCount == 0)
+    {
+        rating = "No ratings";
+    }
+    else
+    {
+        decimal avgRating = (sum / reviewsCount);
+        rating = avgRating.ToString("0.00");
+    }
+    var now = DateTime.Now;
+    var userID = _userManager.GetUserId(User);
+    var query = from r in context.Rentals
+                where r.MovieID == Model.Id && r.UserId == userID && r.RentEndDate >= now
+                select r;
+}
+
+<div class="container movieCard col-md-12">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="col-md-12">
+                <img class="poster" src="@posterPath" />
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="row h">
+                <div class="col-md-12 pb-4">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        @if (query.Count() == 0)
+                        {
+                            <a class="detailsTitle">@Html.DisplayFor(model => model.Title)</a>
+                            <input type="button" value="Rent this movie" class="btn btn-secondary" onclick="location.href='@Url.Action("Index", "Rental", new { movieID = Model.Id })'" />
+                        }
+                        else
+                        {
+                            <a class="detailsTitle">@Html.DisplayFor(model => model.Title) </a>
+                            <input type="button" value="Watch!" class="btn btn-info" onclick="location.href='https://youtube.com/results?search_query=@this.Model.Title'" />
+
+                        }
+                    }
+                    else
+                    {
+                        <a class="detailsTitle">@Html.DisplayFor(model => model.Title)</a>
+                    }
+                </div>
+            </div>
+            <div class="row h-100">
+                <div class="col-md-6">
+                    <div class="row h-25">
+                        <div class="col-md-12 h-25 pb-4">
+                            <span class="details-span">Average rating:</span>
+                            <a class="details-text">@Html.DisplayFor(model => rating)</a>
+                            <div class="row">
+                                <div class="col-md-12 pb-4">
+                                    @*<span class="details-span ">Based on @reviewsCount ratings</span>*@
+                                    <a class="details-text-info"> Based on <span class="badge badge-secondary">@reviewsCount</span> ratings</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row h-25">
+                        <div class="col-md-12 h-25 pb-4">
+                            <span class="details-span">Year:</span>
+                            <a class="details-text">@Html.DisplayFor(model => model.Year)</a>
+                        </div>
+                    </div>
+                    <div class="row h-25">
+                        <div class="col-md-12 h-25 pb-4">
+                            <span class="details-span">Runtime:</span>
+                            <a class="details-text">@Html.DisplayFor(model => model.Runtime)</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 text-left">
+                    <a class="">
+                        <span class="details-span">Plot:</span>
+                        <a class="details-text">@Html.DisplayFor(model => model.Description)</a>
+                    </a>
+                </div>
+                <div class="col-md-6 text-left">
+                    <a asp-action="LikeMovie" asp-controller="Social" asp-route-id="@movie.Id">Add this movie to favorites.</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    @*<div class="row justify-content-center">
+             <input type="button" asp-controller="Rental" asp-action="Index" value="Rent this movie" class="btn btn-primary" />
+             @if (User.Identity.IsAuthenticated)
+             {
+                 @if (query.Count() == 0)
+                 {
+                     <input type="button" value="Rent this movie" class="btn btn-primary" onclick="location.href='@Url.Action("Index", "Rental", new { movieID =  Model.Id })'" />
+                 }
+             }
+
+        </div>*@
+
+</div>
+@if (User.Identity.IsAuthenticated)
+{
+    @await Html.PartialAsync("Partials/_ReviewForm", new Movies.Web.Models.ReviewDTO(), new ViewDataDictionary(this.ViewData) { { "movieid", Model.Id } })
+}
+else
+{
+    <div class="row justify-content-center"><h1>Log in to comment and rate!</h1></div>
+}
+<div>
+    @await Component.InvokeAsync("ReviewsList", new { movieID = Model.Id })
+</div>
+
+@*<div>
+        <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+        <a asp-action="Index">Back to List</a>
+    </div>*@
