@@ -5,20 +5,21 @@
 @using Movies.Web.Models
 @using Microsoft.EntityFrameworkCore
 @{
+
     var queryOne = (from reviews in context.Reviews
-                    join followings in context.Followings on reviews.UserID equals followings.FollowedUser.Id
+                        //join followings in context.Followings on reviews.UserID equals followings.FollowedUser.Id
                     join movies in context.Movies on reviews.MovieId equals movies.Id
-                    where followings.FollowingUser.Id == userManager.GetUserId(User)
-                    where followings.IsActive == true
+                    //where followings.FollowingUser.Id == userManager.GetUserId(User)
+                    //where followings.IsActive == true
                     orderby reviews.CreatedAt descending
-                    select new SocialFeedItem { ItemId = movies.Id, Type = "review", Title = movies.Title, Rating = reviews.Rating, Content = reviews.Content, User = followings.FollowedUser, CreatedAt = reviews.CreatedAt }).AsEnumerable();
+                    select new SocialFeedItem { ItemId = movies.Id, Type = "review", Title = movies.Title, Rating = reviews.Rating, Content = reviews.Content, User = reviews.User, CreatedAt = reviews.CreatedAt }).AsEnumerable();
 
     var queryTwo = (from boardPosts in context.BoardPosts
-                    join followings in context.Followings on boardPosts.UserID equals followings.FollowedUser.Id
-                    where followings.FollowingUser.Id == userManager.GetUserId(User)
-                    where followings.IsActive == true
+                        //join followings in context.Followings on boardPosts.UserID equals followings.FollowedUser.Id
+                        //where followings.FollowingUser.Id == userManager.GetUserId(User)
+                        //where followings.IsActive == true
                     orderby boardPosts.CreatedAt descending
-                    select new SocialFeedItem { ItemId = boardPosts.Id, Type = "post", Title = boardPosts.Title, Rating = 0, Content = boardPosts.Content, User = followings.FollowedUser, CreatedAt = boardPosts.CreatedAt }).AsEnumerable();
+                    select new SocialFeedItem { ItemId = boardPosts.Id, Type = "post", Title = boardPosts.Title, Rating = 0, Content = boardPosts.Content, User = boardPosts.User, CreatedAt = boardPosts.CreatedAt }).AsEnumerable();
 
     var queryThree = (from boardPosts in context.BoardPosts
                       where boardPosts.UserID == userManager.GetUserId(User)
@@ -26,31 +27,16 @@
                       select new SocialFeedItem { ItemId = boardPosts.Id, Type = "post", Title = boardPosts.Title, Rating = 0, Content = boardPosts.Content, User = boardPosts.User, CreatedAt = boardPosts.CreatedAt }).AsEnumerable();
 
     var joinedQueries = queryOne.Concat(queryTwo).Concat(queryThree).OrderByDescending(i => i.CreatedAt);
-
-    var filteredList = joinedQueries.Count() > 10 ? joinedQueries.Take(10) : joinedQueries;
 }
+
 
 @if (signInManager.IsSignedIn(User))
 {
-    <div class="status-form">
-        <form asp-action="PostOnBoard" asp-controller="Social">
-            <div class="form-group">
-                <textarea asp-for="Content" class="form-control" rows="5"></textarea>
-                <span asp-validation-for="Content" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Update your status" id="addReview" class="btn btn-primary btn-commit" />
-            </div>
-        </form>
-
-       
-
-    </div>
     <div class="row justify-content-center">
         <div class="recent-social-activity-homepage">
             <h2>Social activity</h2>
             <div class="social-activity">
-                @foreach (var item in filteredList.ToList())
+                @foreach (var item in joinedQueries.ToList())
                 {
                     @if (item.Type == "post")
                     {
@@ -92,11 +78,5 @@
                 <a class="load-more" href="#">Load more...</a>
             </div>
         </div>
-    </div>
-}
-else
-{
-    <div class="animated pulse infinite delay-1s greeting-nonregistered">
-        <h2>Create account or login to jump into movie-maniacs society!</h2>
     </div>
 }

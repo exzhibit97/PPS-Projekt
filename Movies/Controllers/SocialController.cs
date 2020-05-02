@@ -40,6 +40,12 @@ namespace Movies.Web.Controllers
             return View(userProfileViewModel);
         }
 
+        [Route("Social/Latest")]
+        public IActionResult LatestFeed()
+        {
+            return View();
+        }
+
         [Route("Social/FollowUser/{UserId}")]
         public async Task<IActionResult> FollowUser(string UserId)
         {
@@ -94,18 +100,21 @@ namespace Movies.Web.Controllers
         }
 
 
-        public async Task<IActionResult> PostOnBoard([FromForm] BoardPost post)
+        public async Task<IActionResult> PostOnBoard([FromBody] BoardPost post)
         {
+            var user = await _userManager.GetUserAsync(User);
             BoardPost boardPost = new BoardPost()
             {
                 Title = "placeholder",
                 Content = post.Content,
-                User = await _userManager.GetUserAsync(HttpContext.User),
+                UserID = user.Id,                
+                CreatedAt = DateTime.Now
             };
 
             _repository.Add<BoardPost>(boardPost);
 
-            return RedirectToAction("Index", "Home");
+            //return RedirectToAction("Index", "Home");
+            return new JsonResult(boardPost);
         }
 
         public async Task<IActionResult> ReplyToPost([FromBody] Reply reply)

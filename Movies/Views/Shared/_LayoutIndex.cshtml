@@ -40,6 +40,9 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Social" asp-action="LatestFeed">Latest Feed</a>
+                        </li>
                     </ul>
                 </div>
                 <partial name="_LoginPartial" />
@@ -93,7 +96,6 @@
         });
     </script>
     <script>
-
         $('#carousel').owlCarousel({
             autoPlay: 10000,
             autoplaySpeed: 1000,
@@ -148,6 +150,46 @@
                 type: "POST",
                 contentType: "application/json:charset=UTF-8",
                 dataType: "json"
+            });
+        }
+
+        $(document).ready(function () {
+            $('#addReview').on('click', function (e) {
+                e.preventDefault();
+                var content = $('#Content').val();
+                console.log(content);
+                AddBoardPost(content, e);
+            });
+        });
+
+        function AddBoardPost(content, ev) {
+
+            var ev = event;
+            var boardPostObj = {
+                Content: content,
+            };
+            $.ajax({
+                url: "/Social/PostOnBoard/",
+                data: JSON.stringify(boardPostObj),
+                type: "POST",
+                contentType: "application/json:charset=UTF-8",
+                dataType: "json",
+                success: function (data) {
+                    console.log(data);
+                    $('.social-activity').prepend(
+                        '<div class="post-wrapper">' +
+                        '<div class="info-and-content">' +
+                        '<a>' + '</a>' +
+                        '<p></p><h3><a href="/Social/PostDetails/7">placeholder </a></h3><a href="/Social/UserDetails/f60589c4-9010-4e84-be29-2115eff09894"> asd@asd.pl</a><p></p>' +
+                        '<hr>' +
+                        '<a class="post-content">d</a>' +
+                        '</div>' +
+                        '<div class="replies-section">' +
+                        '<img class="comment-icon" id="7" src="/images/social/comments.png">' +
+                        '<a>0</a>' +
+                        '</div>' +
+                        '</div>');
+                }
             });
         }
     </script>
